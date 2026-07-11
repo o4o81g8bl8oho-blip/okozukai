@@ -92,9 +92,21 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--pink); ou
   position: relative; display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 10px 17px; margin: 0 22px;
 }
-.tile { border: none; background: none; padding: 0; border-radius: 18px; cursor: pointer; }
-.tile img { width: 100%; display: block; border-radius: 18px; }
-.tile[aria-pressed="true"] { outline: 3px solid var(--pink-deep); outline-offset: -2px; }
+.tile { position: relative; border: none; background: none; padding: 0; border-radius: 18px; cursor: pointer; aspect-ratio: 232 / 194; }
+.tile img { width: 100%; height: 100%; display: block; border-radius: 18px; object-fit: cover; }
+.tile-card {
+  position: absolute; inset: 2.5% 2% 3.5% 2%;
+  background: #EDF4E7;
+  border-radius: 13px; border: 2px solid rgba(255,255,255,0.85);
+  box-shadow: 0 3px 6px rgba(150,120,90,0.14);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+}
+.tile-card svg { width: 46%; height: auto; display: block; }
+.tile-name { font-size: 12.5px; font-weight: 700; color: #7A6C62; letter-spacing: 0.05em; }
+.tile[aria-pressed="true"]::after {
+  content: ""; position: absolute; inset: 1.5% 1% 2.5% 1%;
+  border: 3px solid var(--pink-deep); border-radius: 13px; pointer-events: none;
+}
 .grid-star { position: absolute; right: -19px; top: 44%; width: 28px; pointer-events: none; }
 .dm-row { display: flex; gap: 15px; margin: 18px 22px 0; }
 .dm-label {
@@ -205,9 +217,18 @@ input.field[type=date] { min-height: 42px; -webkit-appearance: none; appearance:
 .entry-name { font-size: 13px; font-weight: 800; }
 .entry-sub { font-size: 11px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .entry-amount { font-weight: 800; font-size: 14px; color: var(--pink-deep); font-variant-numeric: tabular-nums; }
-.del-btn {
+.del-btn, .edit-btn {
   width: 26px; height: 26px; border-radius: 99px; border: 1.5px solid var(--line); background: #FBF4E6;
   color: var(--sub2); font-size: 13px; cursor: pointer; flex-shrink: 0; font-weight: 800;
+}
+.edit-btn { color: #C99AA6; background: #FBEDF0; }
+.edit-note {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 14px 22px -4px; font-size: 13px; font-weight: 800; color: #B08585;
+}
+.edit-cancel {
+  border: 1.5px solid #EAD3D3; background: #FFF6F4; color: #B08585;
+  font-size: 12px; font-weight: 800; border-radius: 99px; padding: 4px 12px; cursor: pointer;
 }
 
 /* 月/年ナビ */
@@ -331,15 +352,15 @@ var ICONS = {
     '<path d="M37.5 14.5l3.5-8.5"/></g>' +
     '<path d="M27 15h16l-1.9 21.2a3.6 3.6 0 0 1-3.6 3.3h-5a3.6 3.6 0 0 1-3.6-3.3Z" fill="#F8D8C2" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>' +
     '<path d="M28 22.5h14" stroke="' + ST + '" stroke-width="2" stroke-linecap="round"/>',
-  conbini:
-    '<rect x="9" y="19" width="30" height="19" rx="2.5" fill="#FFFDF6" stroke="' + ST + '" stroke-width="2.2"/>' +
-    '<path d="M7.5 19.5L11 12h26l3.5 7.5Z" fill="#DEEDD5" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>' +
-    '<path d="M16.5 12.5v6.5M24 15v4M31.5 12.5v6.5" stroke="' + ST + '" stroke-width="1.5"/>' +
-    '<rect x="20.5" y="26" width="7" height="12" rx="1" fill="#CFE2F0" stroke="' + ST + '" stroke-width="1.8"/>' +
-    '<rect x="12.5" y="26" width="5" height="6" rx="1" fill="#CFE2F0" stroke="' + ST + '" stroke-width="1.6"/>' +
-    '<rect x="30.5" y="26" width="5" height="6" rx="1" fill="#CFE2F0" stroke="' + ST + '" stroke-width="1.6"/>' +
-    '<circle cx="24" cy="8.5" r="5.4" fill="#FFFDF6" stroke="' + ST + '" stroke-width="2"/>' +
-    '<text x="24" y="11.2" text-anchor="middle" font-size="7" font-weight="800" fill="' + ST + '">24</text>',
+  transport:
+    '<rect x="8" y="10" width="32" height="24" rx="6" fill="#DEEDD5" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<rect x="13" y="15" width="9" height="8" rx="2" fill="#CFE2F0" stroke="' + ST + '" stroke-width="1.8"/>' +
+    '<rect x="26" y="15" width="9" height="8" rx="2" fill="#CFE2F0" stroke="' + ST + '" stroke-width="1.8"/>' +
+    '<path d="M8 27h32" stroke="' + ST + '" stroke-width="1.6"/>' +
+    '<circle cx="16" cy="36.5" r="3.4" fill="#FFFDF6" stroke="' + ST + '" stroke-width="2"/>' +
+    '<circle cx="32" cy="36.5" r="3.4" fill="#FFFDF6" stroke="' + ST + '" stroke-width="2"/>' +
+    '<path d="M7 43h34" stroke="#B9A28B" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 4"/>' +
+    '<ellipse cx="13" cy="30.5" rx="1.8" ry="1.2" fill="#F6BFBC"/><ellipse cx="35" cy="30.5" rx="1.8" ry="1.2" fill="#F6BFBC"/>',
   hobby:
     '<path d="M13 17h22c4.5 0 8 4.5 8 10s-2.6 9-5.6 9c-2.4 0-3.8-1.6-5.4-3.6-1.4-1.8-3-2.4-8-2.4s-6.6.6-8 2.4C14.4 34.4 13 36 10.6 36 7.6 36 5 32.5 5 27s3.5-10 8-10z" fill="#E7E2ED" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>' +
     '<path d="M16 22.5v7M12.5 26h7" stroke="' + ST + '" stroke-width="2.2" stroke-linecap="round"/>' +
@@ -449,7 +470,7 @@ function bunnyPeek() {
 // ---------- 費目 ----------
 var CATEGORIES = [
   { id: "eatout",  name: "外食・カフェ",     color: "#F2AC85", chipBg: "#FBE8DC" },
-  { id: "conbini", name: "コンビニ・おやつ", color: "#A5CD90", chipBg: "#E7F1E0" },
+  { id: "transport", name: "交通費", color: "#A5CD90", chipBg: "#E7F1E0" },
   { id: "hobby",   name: "趣味・娯楽",       color: "#AFA3C6", chipBg: "#EDE9F3" },
   { id: "book",    name: "書籍・学び",       color: "#E5C36A", chipBg: "#FBF1D4" },
   { id: "fashion", name: "美容",             color: "#F0A2B9", chipBg: "#FBE4EA" },
@@ -482,7 +503,7 @@ var tab = "add";
 var now = new Date();
 var viewYM = { y: now.getFullYear(), m: now.getMonth() + 1 };
 var viewYear = now.getFullYear();
-var draft = { amount: "", catId: null, date: todayStr(), memo: "" };
+var draft = { amount: "", catId: null, date: todayStr(), memo: "", editingId: null };
 var toastTimer = null;
 
 function loadEntries() {
@@ -490,7 +511,10 @@ function loadEntries() {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     var d = JSON.parse(raw);
-    return Array.isArray(d.entries) ? d.entries : [];
+    var list = Array.isArray(d.entries) ? d.entries : [];
+    // 廃止した費目（コンビニ・おやつ）は「その他」へ移す
+    list.forEach(function (e) { if (e.catId === "conbini") e.catId = "other"; });
+    return list;
   } catch (e) { return []; }
 }
 function saveEntries() {
@@ -612,6 +636,7 @@ function entryRowHTML(e) {
     '<div class="entry-sub">' + md + (e.memo ? "・" + esc(e.memo) : "") + '</div>' +
     '</div>' +
     '<div class="entry-amount">' + yen(e.amount) + '</div>' +
+    '<button class="edit-btn" data-act="edit" data-id="' + esc(e.id) + '" aria-label="この記録を書きなおす">✎</button>' +
     '<button class="del-btn" data-act="del" data-id="' + esc(e.id) + '" aria-label="この記録を削除">×</button>' +
     '</div>';
 }
@@ -636,8 +661,13 @@ function catBarsHTML(cats, withRank) {
 function renderAdd() {
   var tiles = CATEGORIES.map(function (c) {
     var on = draft.catId === c.id;
+    var inner = c.id === "transport"
+      ? '<span class="tile-card">' +
+        '<svg viewBox="0 0 48 48" aria-hidden="true">' + ICONS.transport + '</svg>' +
+        '<span class="tile-name">' + esc(c.name) + '</span></span>'
+      : '<img src="ui/tile-' + c.id + '.jpg" alt="' + esc(c.name) + '">';
     return '<button class="tile" data-act="pickcat" data-cat="' + c.id + '" aria-pressed="' + on + '">' +
-      '<img src="ui/tile-' + c.id + '.jpg" alt="' + esc(c.name) + '"></button>';
+      inner + '</button>';
   }).join("");
 
   var recent = entries.slice().sort(function (a, b) { return b.date.localeCompare(a.date); }).slice(0, 8);
@@ -660,6 +690,9 @@ function renderAdd() {
     '<div class="dm-wrap"><input class="dm-field" id="inpMemo" type="text" placeholder="例：友達とランチ" value="' + esc(draft.memo) + '">' +
     '<img class="memo-bunny" src="ui/memo-bunny.png" alt=""></div></div>' +
     '</div>' +
+    (draft.editingId
+      ? '<div class="edit-note">✏️ 記録を書きなおし中<button class="edit-cancel" data-act="canceledit">やめる</button></div>'
+      : '') +
     '<button class="add-btn2" data-act="add"><img src="ui/btn.jpg" alt="記録する"></button>' +
 
     '<div class="section-title">' + miniIcon("pencil", 18) + '最近の記録</div>' + recentHTML;
@@ -753,19 +786,55 @@ function addEntry() {
   if (!v || v <= 0) { flash("金額を入力してね"); return; }
   if (!draft.catId) { flash("費目を選んでね"); return; }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date)) { flash("日付を入れてね"); return; }
+  if (draft.editingId) {
+    var target = null;
+    for (var i = 0; i < entries.length; i++) if (entries[i].id === draft.editingId) { target = entries[i]; break; }
+    if (target) {
+      target.date = draft.date;
+      target.amount = Math.round(v);
+      target.catId = draft.catId;
+      target.memo = draft.memo.trim();
+      saveEntries();
+      resetDraft();
+      render();
+      flash("書きなおしたよ！");
+      return;
+    }
+  }
   var e = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     date: draft.date, amount: Math.round(v), catId: draft.catId, memo: draft.memo.trim()
   };
   entries.unshift(e);
   saveEntries();
-  draft.amount = ""; draft.memo = ""; draft.catId = null;
+  resetDraft();
   render();
   flash(yen(e.amount) + " を記録したよ！");
 }
 
+function resetDraft() {
+  draft.amount = ""; draft.memo = ""; draft.catId = null;
+  draft.date = todayStr(); draft.editingId = null;
+}
+
+function startEdit(id) {
+  var e = null;
+  for (var i = 0; i < entries.length; i++) if (entries[i].id === id) { e = entries[i]; break; }
+  if (!e) return;
+  draft.amount = String(e.amount);
+  draft.catId = e.catId;
+  draft.date = e.date;
+  draft.memo = e.memo || "";
+  draft.editingId = e.id;
+  tab = "add";
+  render();
+  mainEl.scrollTop = 0;
+  flash("内容を直して「記録する」を押してね");
+}
+
 function removeEntry(id) {
   entries = entries.filter(function (e) { return e.id !== id; });
+  if (draft.editingId === id) resetDraft();
   saveEntries();
   render();
   flash("削除したよ");
@@ -777,6 +846,8 @@ mainEl.addEventListener("click", function (ev) {
   var act = t.getAttribute("data-act");
   if (act === "pickcat") { draft.catId = t.getAttribute("data-cat"); render(); }
   else if (act === "add") addEntry();
+  else if (act === "edit") startEdit(t.getAttribute("data-id"));
+  else if (act === "canceledit") { resetDraft(); render(); flash("書きなおしをやめたよ"); }
   else if (act === "del") removeEntry(t.getAttribute("data-id"));
   else if (act === "shiftmonth") {
     var d = Number(t.getAttribute("data-d"));
