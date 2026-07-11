@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FAF2E5">
+<meta name="apple-mobile-web-app-title" content="おこづかい帳">
+<meta name="description" content="おこづかい帳 — じぶんの「何にいくら」を見える化しよう！">
+<title>おこづかい帳</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAF2E5;
+  --card: #FFFBF1;
+  --line: #F0E2CE;
+  --ink: #7B6353;
+  --sub: #B29C8A;
+  --sub2: #C4B2A2;
+  --pink: #EFA9B5;
+  --pink-deep: #E08A9B;
+  --field: #FDF8EE;
+  --stroke: #A98E76;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'M PLUS Rounded 1c', 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  display: flex;
+  justify-content: center;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; }
+input { font-family: inherit; color: var(--ink); }
+input::placeholder { color: #CDBBA9; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+button:focus-visible, input:focus-visible { outline: 2.5px solid var(--pink); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.app {
+  width: 100%; max-width: 430px; min-height: 100dvh;
+  display: flex; flex-direction: column; position: relative;
+}
+.header {
+  display: flex; align-items: center; gap: 10px;
+  padding: calc(16px + env(safe-area-inset-top)) 16px 8px;
+  position: relative;
+}
+.avatar {
+  width: 46px; height: 46px; border-radius: 99px; background: #FDEFE0;
+  border: 1.5px solid var(--line); display: flex; align-items: flex-end;
+  justify-content: center; overflow: hidden; flex-shrink: 0;
+}
+.h-title {
+  flex: 1; text-align: center;
+  font-size: 22px; font-weight: 800; letter-spacing: 0.16em; color: #93796A;
+}
+.menu-btn {
+  width: 42px; height: 42px; border-radius: 99px;
+  border: 1.5px solid var(--line); background: #FFFBF1;
+  font-size: 18px; font-weight: 800; color: var(--sub); cursor: pointer;
+  box-shadow: 0 1px 3px rgba(123,99,83,0.08); flex-shrink: 0;
+  line-height: 1; padding-bottom: 8px;
+}
+.deco-cloud { position: absolute; opacity: .8; pointer-events: none; }
+
+main { flex: 1; padding: 6px 14px calc(104px + env(safe-area-inset-bottom)); }
+
+.card {
+  background: var(--card); border-radius: 22px; padding: 16px;
+  border: 1.5px solid var(--line);
+  box-shadow: 0 2px 8px rgba(150,120,90,0.07); margin-bottom: 14px;
+}
+.card-heading {
+  font-size: 14px; font-weight: 800; margin: 2px 0 10px;
+  display: flex; align-items: center; gap: 7px;
+}
+.card-heading svg { flex-shrink: 0; }
+.section-title {
+  font-size: 14px; font-weight: 800; margin: 16px 6px 8px;
+  display: flex; align-items: center; gap: 7px;
+}
+.empty {
+  background: var(--card); border: 1.8px dashed #E2CFB6; border-radius: 22px;
+  padding: 20px; text-align: center; font-size: 13px; color: var(--sub);
+  font-weight: 700; line-height: 1.7;
+}
+
+/* 金額カード */
+.amount-flex { display: flex; align-items: flex-end; gap: 4px; }
+.amount-left { flex: 1; min-width: 0; padding-bottom: 18px; }
+.amount-row {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 4px 2px 0;
+}
+.amount-yen { font-size: 26px; font-weight: 800; color: #93796A; }
+.amount-input {
+  flex: 1; border: none; outline: none; font-size: 42px; font-weight: 800;
+  background: transparent; font-variant-numeric: tabular-nums; width: 100%; min-width: 0;
+  color: #8A6F5D;
+}
+.amount-input::placeholder { color: #D8C4AE; }
+.amount-underline { border-bottom: 2px dashed #E8D6BE; margin-top: 2px; }
+.bunny-wrap { width: 46%; max-width: 175px; flex-shrink: 0; margin-bottom: -16px; }
+.bunny-wrap svg { display: block; width: 100%; height: auto; }
+
+/* 費目チップ */
+.chip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px; }
+.chip {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 14px 4px 11px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.9);
+  cursor: pointer; transition: all .12s;
+  box-shadow: 0 2px 5px rgba(150,120,90,0.10);
+}
+.chip-text { font-size: 11px; font-weight: 800; color: var(--ink); line-height: 1.25; text-align: center; }
+
+.field-label {
+  font-size: 12.5px; font-weight: 800; color: var(--ink);
+  display: flex; align-items: center; gap: 6px; margin: 10px 0 6px;
+}
+.field {
+  width: 100%; padding: 11px 14px; border-radius: 99px;
+  border: 1.5px solid var(--line); font-size: 13.5px; font-weight: 700;
+  background: var(--card); outline: none;
+  box-shadow: 0 1px 3px rgba(150,120,90,0.06);
+}
+input.field[type=date] { min-height: 42px; -webkit-appearance: none; appearance: none; }
+.add-btn {
+  width: 100%; margin-top: 18px; padding: 13px 0; border-radius: 99px;
+  background: linear-gradient(180deg, #F6BFC8, #EFA3B0);
+  color: #FFF9F0; font-size: 16px; font-weight: 800; letter-spacing: 0.12em;
+  border: 2px solid rgba(255,255,255,0.85); cursor: pointer;
+  box-shadow: 0 4px 12px rgba(239,163,176,0.45);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.add-btn:active { transform: translateY(1px); }
+
+/* 明細行 */
+.entry-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1.8px dashed #EFE0CB; }
+.entry-row:last-child { border-bottom: none; }
+.entry-emoji {
+  width: 40px; height: 40px; border-radius: 14px; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.9);
+}
+.entry-main { flex: 1; min-width: 0; }
+.entry-name { font-size: 13px; font-weight: 800; }
+.entry-sub { font-size: 11px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.entry-amount { font-weight: 800; font-size: 14px; color: var(--pink-deep); font-variant-numeric: tabular-nums; }
+.del-btn {
+  width: 26px; height: 26px; border-radius: 99px; border: 1.5px solid var(--line); background: #FBF4E6;
+  color: var(--sub2); font-size: 13px; cursor: pointer; flex-shrink: 0; font-weight: 800;
+}
+
+/* 月/年ナビ */
+.month-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 6px 0 12px; }
+.nav-btn {
+  width: 38px; height: 38px; border-radius: 99px; border: 1.5px solid var(--line);
+  background: var(--card); font-size: 18px; cursor: pointer; color: var(--pink-deep); font-weight: 800;
+  box-shadow: 0 1px 3px rgba(150,120,90,0.10);
+}
+.month-label { font-size: 17px; font-weight: 800; min-width: 116px; text-align: center; color: #93796A; }
+
+/* サマリー */
+.summary-caption { font-size: 13.5px; font-weight: 800; }
+.hint {
+  display: inline-flex; width: 16px; height: 16px; border-radius: 99px; background: #AFC9E5;
+  color: #FFF; font-size: 10px; align-items: center; justify-content: center;
+  vertical-align: middle; margin-left: 3px; border: none; cursor: pointer; padding: 0;
+}
+.big-amount { line-height: 1.2; }
+.big-amount-pre { font-size: 14px; font-weight: 800; }
+.big-amount-num { font-size: 34px; font-weight: 800; color: #8A6F5D; font-variant-numeric: tabular-nums; }
+.dashed { border-top: 1.8px dashed #EBDAC2; margin: 12px 0; }
+.cat-row { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 800; }
+.cat-icon {
+  width: 26px; height: 26px; border-radius: 9px; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.cat-name { flex: 1; color: var(--ink); }
+.cat-pct { font-size: 11px; color: var(--sub); font-weight: 700; }
+.cat-val { color: var(--pink-deep); font-variant-numeric: tabular-nums; }
+.bar-track { height: 9px; background: #F3E9D8; border-radius: 99px; margin-top: 5px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width .3s; }
+.rank-num {
+  width: 21px; height: 21px; border-radius: 99px; font-size: 11px; display: flex;
+  align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0;
+}
+.muted-note { font-size: 13px; color: var(--sub); text-align: center; padding: 8px 0; font-weight: 700; }
+
+/* タブバー */
+.tabbar {
+  position: fixed; bottom: calc(10px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+  width: calc(100% - 20px); max-width: 410px;
+  display: flex; gap: 4px; background: #FFFBF1; border: 1.5px solid var(--line);
+  padding: 7px;
+  border-radius: 26px;
+  box-shadow: 0 4px 16px rgba(150,120,90,0.16); z-index: 10;
+}
+.tab-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px;
+  background: none; border: none; cursor: pointer; padding: 8px 0 6px;
+  color: var(--sub); border-radius: 20px;
+}
+.tab-btn.active { color: var(--ink); background: #FADCDC; }
+.tab-btn svg { display: block; }
+.tab-label { font-size: 11px; font-weight: 800; }
+
+/* トースト */
+.toast {
+  position: fixed; bottom: calc(104px + env(safe-area-inset-bottom)); left: 50%;
+  transform: translateX(-50%);
+  background: #8A7260; color: #FFF7EA; font-size: 13px; font-weight: 700;
+  padding: 10px 20px; border-radius: 99px; white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(123,99,83,0.35); z-index: 30;
+  max-width: calc(100vw - 30px); overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 設定シート */
+.sheet-bg {
+  position: fixed; inset: 0; background: rgba(123,99,83,0.35); z-index: 20;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.sheet {
+  width: 100%; max-width: 430px; background: #FFFBF1; border-radius: 26px 26px 0 0;
+  padding: 20px 18px calc(24px + env(safe-area-inset-bottom));
+  border: 1.5px solid var(--line); border-bottom: none;
+}
+.sheet-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.sheet-sub { font-size: 12px; color: var(--sub); font-weight: 700; margin-bottom: 14px; }
+.sheet-btn {
+  width: 100%; padding: 13px; border-radius: 99px; border: 1.5px solid var(--line);
+  background: var(--field); font-size: 14px; font-weight: 800; color: var(--ink);
+  cursor: pointer; margin-bottom: 10px; text-align: center; display: block;
+}
+.sheet-btn.danger { color: #C97878; border-color: #F0CFC9; background: #FCF1EC; }
+.sheet-close {
+  width: 100%; padding: 12px; border-radius: 99px; border: none;
+  background: #F3E9D8; font-size: 14px; font-weight: 800; color: var(--sub);
+  cursor: pointer; margin-top: 4px;
+}
+
+/* グラフ共通 */
+.chart-wrap { width: 100%; }
+.chart-wrap svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <svg class="deco-cloud" style="top:14px;right:66px" width="34" height="18" viewBox="0 0 34 18"><path d="M8 16a6 6 0 0 1-.6-12A7.5 7.5 0 0 1 22 5.4 5.4 5.4 0 0 1 25 16Z" fill="#FFFDF6" stroke="#EFE0CB" stroke-width="1.5"/></svg>
+    <svg class="deco-cloud" style="top:52px;left:120px" width="26" height="14" viewBox="0 0 34 18"><path d="M8 16a6 6 0 0 1-.6-12A7.5 7.5 0 0 1 22 5.4 5.4 5.4 0 0 1 25 16Z" fill="#FFFDF6" stroke="#F2E5D2" stroke-width="1.5"/></svg>
+    <div class="avatar" id="avatarSlot"></div>
+    <div class="h-title">okozukai app</div>
+    <button class="menu-btn" id="gearBtn" aria-label="設定">…</button>
+  </header>
+  <main id="main"></main>
+  <nav class="tabbar" id="tabbar"></nav>
+</div>
+
+<script>
+"use strict";
+
+// ---------- SVGパーツ ----------
+var ST = "#A98E76";
+
+var ICONS = {
+  eatout:
+    '<g fill="none" stroke="' + ST + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M10 7v6a4 4 0 0 0 8 0V7"/><path d="M14 7v6"/><path d="M14 17v24"/>' +
+    '<path d="M37.5 14.5l3.5-8.5"/></g>' +
+    '<path d="M27 15h16l-1.9 21.2a3.6 3.6 0 0 1-3.6 3.3h-5a3.6 3.6 0 0 1-3.6-3.3Z" fill="#F8D8C2" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+    '<path d="M28 22.5h14" stroke="' + ST + '" stroke-width="2" stroke-linecap="round"/>',
+  conbini:
+    '<rect x="9" y="19" width="30" height="19" rx="2.5" fill="#FFFDF6" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<path d="M7.5 19.5L11 12h26l3.5 7.5Z" fill="#DEEDD5" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+    '<path d="M16.5 12.5v6.5M24 15v4M31.5 12.5v6.5" stroke="' + ST + '" stroke-width="1.5"/>' +
+    '<rect x="20.5" y="26" width="7" height="12" rx="1" fill="#CFE2F0" stroke="' + ST + '" stroke-width="1.8"/>' +
+    '<rect x="12.5" y="26" width="5" height="6" rx="1" fill="#CFE2F0" stroke="' + ST + '" stroke-width="1.6"/>' +
+    '<rect x="30.5" y="26" width="5" height="6" rx="1" fill="#CFE2F0" stroke="' + ST + '" stroke-width="1.6"/>' +
+    '<circle cx="24" cy="8.5" r="5.4" fill="#FFFDF6" stroke="' + ST + '" stroke-width="2"/>' +
+    '<text x="24" y="11.2" text-anchor="middle" font-size="7" font-weight="800" fill="' + ST + '">24</text>',
+  hobby:
+    '<path d="M13 17h22c4.5 0 8 4.5 8 10s-2.6 9-5.6 9c-2.4 0-3.8-1.6-5.4-3.6-1.4-1.8-3-2.4-8-2.4s-6.6.6-8 2.4C14.4 34.4 13 36 10.6 36 7.6 36 5 32.5 5 27s3.5-10 8-10z" fill="#E7E2ED" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+    '<path d="M16 22.5v7M12.5 26h7" stroke="' + ST + '" stroke-width="2.2" stroke-linecap="round"/>' +
+    '<circle cx="31.5" cy="24" r="2" fill="' + ST + '"/><circle cx="36.5" cy="28" r="2" fill="' + ST + '"/>',
+  book:
+    '<g transform="rotate(-8 16 24)"><rect x="9" y="13" width="14" height="21" rx="2" fill="#F7CFD8" stroke="' + ST + '" stroke-width="2"/><path d="M12.5 19h7" stroke="' + ST + '" stroke-width="1.6" stroke-linecap="round"/></g>' +
+    '<g transform="rotate(7 31 25)"><rect x="24.5" y="15" width="13" height="20" rx="2" fill="#CFE0EA" stroke="' + ST + '" stroke-width="2"/><path d="M27.5 21h7" stroke="' + ST + '" stroke-width="1.6" stroke-linecap="round"/></g>',
+  fashion:
+    '<rect x="10.5" y="21.5" width="9" height="15" rx="2.5" fill="#EFD9E0" stroke="' + ST + '" stroke-width="2"/>' +
+    '<path d="M12.5 21.5v-5.2c0-3.6 5-3.6 5 0v5.2z" fill="#EFA9B5" stroke="' + ST + '" stroke-width="2" stroke-linejoin="round"/>' +
+    '<circle cx="33" cy="21" r="8.2" fill="#FFFDF6" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<circle cx="33" cy="21" r="5" fill="#D8EAF2" stroke="' + ST + '" stroke-width="1.5"/>' +
+    '<path d="M33 29.5v7.5M29 38.5h8" stroke="' + ST + '" stroke-width="2.2" stroke-linecap="round"/>',
+  clothes:
+    '<path d="M18.5 11.5L24 14.5l5.5-3 8.5 5-3.6 6.4-3.4-1.7V36a2.2 2.2 0 0 1-2.2 2.2h-9.6A2.2 2.2 0 0 1 17 36V21.2l-3.4 1.7L10 16.5Z" fill="#CFE0EE" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+    '<circle cx="24" cy="28" r="4.5" fill="#FDF2D8" stroke="' + ST + '" stroke-width="1.3"/>' +
+    '<path d="M22.3 24.5l-.9-3.4M25.7 24.5l.9-3.4" stroke="' + ST + '" stroke-width="1.3" stroke-linecap="round"/>' +
+    '<circle cx="22.6" cy="27.6" r=".8" fill="#6B5546"/><circle cx="25.4" cy="27.6" r=".8" fill="#6B5546"/>',
+  gift:
+    '<rect x="11" y="21" width="26" height="17" rx="2.5" fill="#F9E4E9" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<rect x="9" y="15.5" width="30" height="6.5" rx="2" fill="#F4CBD5" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<path d="M24 15.5V38" stroke="' + ST + '" stroke-width="2"/>' +
+    '<path d="M24 14.5c-1.6-5.5-9.5-4.8-7.6.3 1 2.8 4.8 2.6 7.6-.3zm0 0c1.6-5.5 9.5-4.8 7.6.3-1 2.8-4.8 2.6-7.6-.3z" fill="#F4CBD5" stroke="' + ST + '" stroke-width="1.8" stroke-linejoin="round"/>',
+  subsc:
+    '<rect x="15.5" y="8" width="17" height="31" rx="4" fill="#E5DDF1" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<rect x="18.5" y="12.5" width="11" height="20" rx="1.5" fill="#FFFDF6" stroke="' + ST + '" stroke-width="1.5"/>' +
+    '<path d="M24 27.5c-2.6-1.9-4.1-3.5-4.1-5.2 0-2.4 3-3.2 4.1-1.1 1.1-2.1 4.1-1.3 4.1 1.1 0 1.7-1.5 3.3-4.1 5.2z" fill="#F2AFBA"/>' +
+    '<circle cx="24" cy="35.8" r="1.4" fill="' + ST + '"/>',
+  other:
+    '<circle cx="24" cy="24" r="14.5" fill="none" stroke="#B9A28B" stroke-width="2.2" stroke-dasharray="4.5 4.5"/>' +
+    '<path d="M24 17.5v13M17.5 24h13" stroke="#B9A28B" stroke-width="2.4" stroke-linecap="round"/>'
+};
+function catIcon(id, size) {
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 48 48" aria-hidden="true">' + (ICONS[id] || ICONS.other) + '</svg>';
+}
+
+var MINI = {
+  bag:
+    '<path d="M24 16c-7.5 0-13 6.3-13 12.6C11 34.4 16.4 38 24 38s13-3.6 13-9.4C37 22.3 31.5 16 24 16z" fill="#F6C9CF" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<path d="M19.5 16c-1.5-2-1-6 4.5-6s6 4 4.5 6" fill="none" stroke="' + ST + '" stroke-width="2.2" stroke-linecap="round"/>' +
+    '<text x="24" y="32" text-anchor="middle" font-size="12" font-weight="800" fill="#B37B87">¥</text>',
+  tag:
+    '<g transform="rotate(-18 24 24)"><rect x="11" y="16.5" width="26" height="15" rx="4.5" fill="#F5E3C8" stroke="' + ST + '" stroke-width="2.2"/><circle cx="17" cy="24" r="2.2" fill="#FFFDF6" stroke="' + ST + '" stroke-width="1.6"/></g>',
+  calendar:
+    '<rect x="9" y="12" width="30" height="26" rx="4.5" fill="#FFFDF6" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<path d="M9 16.5a4.5 4.5 0 0 1 4.5-4.5h21a4.5 4.5 0 0 1 4.5 4.5V21H9Z" fill="#F6C9CF" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<path d="M17 8.5v6M31 8.5v6" stroke="' + ST + '" stroke-width="2.2" stroke-linecap="round"/>' +
+    '<circle cx="17" cy="27" r="1.6" fill="' + ST + '"/><circle cx="24" cy="27" r="1.6" fill="' + ST + '"/><circle cx="31" cy="27" r="1.6" fill="' + ST + '"/><circle cx="17" cy="33" r="1.6" fill="' + ST + '"/><circle cx="24" cy="33" r="1.6" fill="' + ST + '"/>',
+  pencil:
+    '<path d="M11 36.5l1.8-7.4L30 11.9a3.4 3.4 0 0 1 4.8 0l1.3 1.3a3.4 3.4 0 0 1 0 4.8L18.9 35.2Z" fill="#F8D3CE" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+    '<path d="M27.5 14.4l6.1 6.1" stroke="' + ST + '" stroke-width="1.8"/>',
+  cloud:
+    '<path d="M14.5 33a7.5 7.5 0 0 1-.8-15 9.5 9.5 0 0 1 18.6 1.6A6.8 6.8 0 0 1 31.5 33Z" fill="#D9E7F2" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>',
+  trophy:
+    '<path d="M15 10h18v9a9 9 0 0 1-18 0z" fill="#F6DB9A" stroke="' + ST + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+    '<path d="M15 13h-4.5a0 0 0 0 0 0 0c0 5 2 8 6.5 8.6M33 13h4.5c0 5-2 8-6.5 8.6" fill="none" stroke="' + ST + '" stroke-width="2" stroke-linecap="round"/>' +
+    '<path d="M24 28v5M18 37.5c0-2.5 2.7-4.5 6-4.5s6 2 6 4.5z" fill="#F6DB9A" stroke="' + ST + '" stroke-width="2" stroke-linejoin="round"/>'
+};
+function miniIcon(name, size) {
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 48 48" aria-hidden="true">' + MINI[name] + '</svg>';
+}
+
+function bunnyFace(size) {
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 48 48" aria-hidden="true">' +
+    '<g transform="rotate(-10 17 12)"><ellipse cx="17" cy="12" rx="4.6" ry="9.5" fill="#FDF2D8" stroke="' + ST + '" stroke-width="1.8"/><ellipse cx="17" cy="13" rx="2" ry="5.5" fill="#F6CBC9"/></g>' +
+    '<g transform="rotate(10 31 12)"><ellipse cx="31" cy="12" rx="4.6" ry="9.5" fill="#FDF2D8" stroke="' + ST + '" stroke-width="1.8"/><ellipse cx="31" cy="13" rx="2" ry="5.5" fill="#F6CBC9"/></g>' +
+    '<circle cx="24" cy="29" r="15" fill="#FDF2D8" stroke="' + ST + '" stroke-width="1.8"/>' +
+    '<circle cx="18.5" cy="28" r="2.2" fill="#4C3B31"/><circle cx="29.5" cy="28" r="2.2" fill="#4C3B31"/>' +
+    '<circle cx="19.3" cy="27.2" r=".7" fill="#FFF"/><circle cx="30.3" cy="27.2" r=".7" fill="#FFF"/>' +
+    '<ellipse cx="13.2" cy="32.5" rx="2.8" ry="1.9" fill="#F6BFBC"/><ellipse cx="34.8" cy="32.5" rx="2.8" ry="1.9" fill="#F6BFBC"/>' +
+    '<path d="M21.6 32q1.2 1.7 2.4.4 1.2 1.3 2.4-.4" fill="none" stroke="#4C3B31" stroke-width="1.3" stroke-linecap="round"/>' +
+    '</svg>';
+}
+
+function heart(x, y, s, color) {
+  return '<path transform="translate(' + x + ' ' + y + ') scale(' + s + ')" d="M0 .5C-.5-.2-1.5-.1-1.5.6-1.5 1.2-.7 1.8 0 2.4.7 1.8 1.5 1.2 1.5.6 1.5-.1.5-.2 0 .5Z" fill="' + color + '"/>';
+}
+function sparkle(x, y, s, color) {
+  return '<path transform="translate(' + x + ' ' + y + ') scale(' + s + ')" d="M0-1l.28.72L1 0l-.72.28L0 1l-.28-.72L-1 0l.72-.28z" fill="' + color + '"/>';
+}
+function flower(x, y, petal) {
+  return '<g fill="' + petal + '">' +
+    '<circle cx="' + (x - 3.6) + '" cy="' + y + '" r="2.7"/><circle cx="' + (x + 3.6) + '" cy="' + y + '" r="2.7"/>' +
+    '<circle cx="' + x + '" cy="' + (y - 3.6) + '" r="2.7"/><circle cx="' + x + '" cy="' + (y + 3.6) + '" r="2.7"/></g>' +
+    '<circle cx="' + x + '" cy="' + y + '" r="2.2" fill="#F6D98B"/>';
+}
+
+// 草原からひょっこりうさぎ
+function bunnyPeek() {
+  return '<svg viewBox="0 0 190 122" aria-hidden="true">' +
+    sparkle(38, 30, 5, "#F3D98B") + sparkle(160, 22, 6.5, "#F3D98B") + sparkle(170, 78, 4, "#F3D98B") +
+    heart(146, 40, 5.5, "#F3A9B8") + heart(160, 58, 3.8, "#F7C9D4") +
+    '<g transform="rotate(-9 78 32)"><ellipse cx="78" cy="30" rx="8" ry="20" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2.2"/><ellipse cx="78" cy="33" rx="3.6" ry="12" fill="#F6CBC9"/></g>' +
+    '<g transform="rotate(9 112 32)"><ellipse cx="112" cy="30" rx="8" ry="20" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2.2"/><ellipse cx="112" cy="33" rx="3.6" ry="12" fill="#F6CBC9"/></g>' +
+    '<circle cx="95" cy="72" r="34" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2.2"/>' +
+    '<circle cx="83" cy="70" r="3.6" fill="#4C3B31"/><circle cx="107" cy="70" r="3.6" fill="#4C3B31"/>' +
+    '<circle cx="84.4" cy="68.6" r="1.2" fill="#FFF"/><circle cx="108.4" cy="68.6" r="1.2" fill="#FFF"/>' +
+    '<ellipse cx="71" cy="79" rx="5.5" ry="3.6" fill="#F6BFBC"/><ellipse cx="119" cy="79" rx="5.5" ry="3.6" fill="#F6BFBC"/>' +
+    '<path d="M91 76q2 2.8 4 .7 2 2.1 4-.7" fill="none" stroke="#4C3B31" stroke-width="1.8" stroke-linecap="round"/>' +
+    '<ellipse cx="95" cy="110" rx="88" ry="9" fill="#E4EFD4"/>' +
+    '<ellipse cx="82" cy="103" rx="7.5" ry="5.5" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2"/>' +
+    '<ellipse cx="108" cy="103" rx="7.5" ry="5.5" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2"/>' +
+    flower(24, 100, "#F7C9D4") + flower(166, 98, "#F7C9D4") +
+    '</svg>';
+}
+
+// ---------- 費目 ----------
+var CATEGORIES = [
+  { id: "eatout",  name: "外食・カフェ",     color: "#F2AC85", chipBg: "#FBE8DC" },
+  { id: "conbini", name: "コンビニ・おやつ", color: "#A5CD90", chipBg: "#E7F1E0" },
+  { id: "hobby",   name: "趣味・娯楽",       color: "#AFA3C6", chipBg: "#EDE9F3" },
+  { id: "book",    name: "書籍・学び",       color: "#E5C36A", chipBg: "#FBF1D4" },
+  { id: "fashion", name: "美容",             color: "#F0A2B9", chipBg: "#FBE4EA" },
+  { id: "clothes", name: "衣服",             color: "#8FB6D9", chipBg: "#DFEAF3" },
+  { id: "gift",    name: "プレゼント",       color: "#E8A49C", chipBg: "#FBEFD9" },
+  { id: "subsc",   name: "サブスク",         color: "#BFA6DF", chipBg: "#EBE4F6" },
+  { id: "other",   name: "その他",           color: "#C4B29B", chipBg: "#F7F0E3" }
+];
+function catOf(id) {
+  for (var i = 0; i < CATEGORIES.length; i++) if (CATEGORIES[i].id === id) return CATEGORIES[i];
+  return CATEGORIES[CATEGORIES.length - 1];
+}
+function yen(n) { return "¥" + Math.round(n).toLocaleString("ja-JP"); }
+function pad2(n) { return String(n).padStart(2, "0"); }
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
+var STORAGE_KEY = "okozukai-data-v1";
+
+// ---------- 状態 ----------
+var entries = loadEntries();
+var tab = "add";
+var now = new Date();
+var viewYM = { y: now.getFullYear(), m: now.getMonth() + 1 };
+var viewYear = now.getFullYear();
+var draft = { amount: "", catId: null, date: todayStr(), memo: "" };
+var toastTimer = null;
+
+function loadEntries() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    var d = JSON.parse(raw);
+    return Array.isArray(d.entries) ? d.entries : [];
+  } catch (e) { return []; }
+}
+function saveEntries() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ entries: entries }));
+  } catch (e) { console.error("保存エラー", e); }
+}
+
+// ドーナツグラフ（手描きSVG）
+function donutSVG(cats) {
+  var size = 190, cx = size / 2, cy = size / 2, r0 = 48, r1 = 76;
+  var total = 0;
+  cats.forEach(function (c) { total += c.value; });
+  if (!total) return "";
+  var padDeg = cats.length > 1 ? 2 : 0;
+  var avail = 360 - padDeg * cats.length;
+  var paths = "";
+  var angle = -90;
+  cats.forEach(function (c) {
+    var sweep = avail * (c.value / total);
+    if (sweep <= 0) { return; }
+    var a0 = angle, a1 = angle + Math.min(sweep, 359.98);
+    angle += sweep + padDeg;
+    var rad0 = a0 * Math.PI / 180, rad1 = a1 * Math.PI / 180;
+    var large = (a1 - a0) > 180 ? 1 : 0;
+    var x0o = cx + r1 * Math.cos(rad0), y0o = cy + r1 * Math.sin(rad0);
+    var x1o = cx + r1 * Math.cos(rad1), y1o = cy + r1 * Math.sin(rad1);
+    var x0i = cx + r0 * Math.cos(rad1), y0i = cy + r0 * Math.sin(rad1);
+    var x1i = cx + r0 * Math.cos(rad0), y1i = cy + r0 * Math.sin(rad0);
+    var d = "M" + x0o.toFixed(2) + " " + y0o.toFixed(2) +
+      " A" + r1 + " " + r1 + " 0 " + large + " 1 " + x1o.toFixed(2) + " " + y1o.toFixed(2) +
+      " L" + x0i.toFixed(2) + " " + y0i.toFixed(2) +
+      " A" + r0 + " " + r0 + " 0 " + large + " 0 " + x1i.toFixed(2) + " " + y1i.toFixed(2) + " Z";
+    paths += '<path d="' + d + '" fill="' + c.color + '" data-act="showval" data-label="' + esc(c.name) + '" data-value="' + c.value + '" style="cursor:pointer"/>';
+  });
+  return '<div class="chart-wrap" style="max-width:220px;margin:0 auto">' +
+    '<svg viewBox="0 0 ' + size + ' ' + size + '" role="img" aria-label="費目の内訳グラフ">' + paths + '</svg></div>';
+}
+
+// 棒グラフ（手描きSVG・月ごと）
+function niceMax(v) {
+  if (v <= 0) return 1000;
+  var pow = Math.pow(10, Math.floor(Math.log10(v)));
+  var n = v / pow;
+  var nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10;
+  return nice * pow;
+}
+function yTickFmt(v) { return v >= 10000 ? (v / 10000) + "万" : String(v); }
+function barChartSVG(arr) {
+  var W = 360, H = 190, padL = 38, padR = 6, padT = 12, padB = 20;
+  var plotW = W - padL - padR, plotH = H - padT - padB;
+  var max = 0;
+  arr.forEach(function (d) { if (d.total > max) max = d.total; });
+  var yMax = niceMax(max);
+  var out = "";
+  var steps = 4;
+  for (var i = 0; i <= steps; i++) {
+    var v = yMax * i / steps;
+    var y = padT + plotH - plotH * i / steps;
+    out += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="#EFE3D0" stroke-dasharray="3 3"/>';
+    out += '<text x="' + (padL - 5) + '" y="' + (y + 3.5) + '" text-anchor="end" font-size="10" fill="#B29C8A">' + yTickFmt(v) + '</text>';
+  }
+  var slot = plotW / arr.length;
+  var bw = slot * 0.6;
+  arr.forEach(function (d, i) {
+    var x = padL + slot * i + (slot - bw) / 2;
+    var cxm = padL + slot * i + slot / 2;
+    out += '<text x="' + cxm + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10" fill="#B29C8A">' + esc(d.name) + '</text>';
+    if (d.total <= 0) return;
+    var h = plotH * d.total / yMax;
+    var y0 = padT + plotH - h;
+    var r = Math.min(6, bw / 2, h);
+    var path = "M" + x + " " + (padT + plotH) +
+      " L" + x + " " + (y0 + r) +
+      " Q" + x + " " + y0 + " " + (x + r) + " " + y0 +
+      " L" + (x + bw - r) + " " + y0 +
+      " Q" + (x + bw) + " " + y0 + " " + (x + bw) + " " + (y0 + r) +
+      " L" + (x + bw) + " " + (padT + plotH) + " Z";
+    out += '<path d="' + path + '" fill="#EFA9B5" data-act="showval" data-label="' + esc(d.name) + '" data-value="' + d.total + '" style="cursor:pointer"/>';
+  });
+  return '<div class="chart-wrap"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="月ごとの支出グラフ">' + out + '</svg></div>';
+}
+
+// ---------- 集計 ----------
+function getMonthEntries() {
+  var p = viewYM.y + "-" + pad2(viewYM.m);
+  return entries.filter(function (e) { return e.date.indexOf(p) === 0; })
+    .sort(function (a, b) { return b.date.localeCompare(a.date); });
+}
+function catBreakdown(list) {
+  var m = {}, total = 0;
+  list.forEach(function (e) { m[e.catId] = (m[e.catId] || 0) + e.amount; total += e.amount; });
+  return CATEGORIES.filter(function (c) { return m[c.id]; }).map(function (c) {
+    return { id: c.id, name: c.name, color: c.color, chipBg: c.chipBg, value: m[c.id], pct: total ? m[c.id] / total * 100 : 0 };
+  }).sort(function (a, b) { return b.value - a.value; });
+}
+function getYearData() {
+  var arr = [];
+  for (var i = 0; i < 12; i++) arr.push({ name: (i + 1) + "月", total: 0 });
+  var yearEntries = [];
+  entries.forEach(function (e) {
+    var y = Number(e.date.slice(0, 4)), m = Number(e.date.slice(5, 7));
+    if (y === viewYear) { arr[m - 1].total += e.amount; yearEntries.push(e); }
+  });
+  var yearTotal = 0;
+  arr.forEach(function (d) { yearTotal += d.total; });
+  return { arr: arr, yearTotal: yearTotal, cats: catBreakdown(yearEntries) };
+}
+
+// ---------- 描画 ----------
+function entryRowHTML(e) {
+  var c = catOf(e.catId);
+  var parts = e.date.split("-");
+  var md = Number(parts[1]) + "/" + Number(parts[2]);
+  return '<div class="entry-row">' +
+    '<div class="entry-emoji" style="background:' + c.chipBg + '">' + catIcon(c.id, 24) + '</div>' +
+    '<div class="entry-main">' +
+    '<div class="entry-name">' + esc(c.name) + '</div>' +
+    '<div class="entry-sub">' + md + (e.memo ? "・" + esc(e.memo) : "") + '</div>' +
+    '</div>' +
+    '<div class="entry-amount">' + yen(e.amount) + '</div>' +
+    '<button class="del-btn" data-act="del" data-id="' + esc(e.id) + '" aria-label="この記録を削除">×</button>' +
+    '</div>';
+}
+function catBarsHTML(cats, withRank) {
+  return cats.map(function (c, i) {
+    var rank = withRank
+      ? '<span class="rank-num" style="background:' + (i < 3 ? "#F6DB9A" : "#F3E9D8") + ';color:' + (i < 3 ? "#8A6A2E" : "#B29C8A") + '">' + (i + 1) + '</span>'
+      : "";
+    return '<div style="margin-bottom:11px">' +
+      '<div class="cat-row">' + rank +
+      '<span class="cat-icon" style="background:' + c.chipBg + '">' + catIcon(c.id, 17) + '</span>' +
+      '<span class="cat-name">' + esc(c.name) + '</span>' +
+      (withRank ? "" : '<span class="cat-pct">' + c.pct.toFixed(0) + '%</span>') +
+      '<span class="cat-val">' + yen(c.value) + '</span>' +
+      '</div>' +
+      '<div class="bar-track"' + (withRank ? ' style="margin-left:28px"' : "") + '>' +
+      '<div class="bar-fill" style="width:' + c.pct + '%;background:linear-gradient(90deg,' + c.color + ',' + c.color + 'CC)"></div>' +
+      '</div></div>';
+  }).join("");
+}
+
+function renderAdd() {
+  var chips = CATEGORIES.map(function (c) {
+    var on = draft.catId === c.id;
+    var style = "background:" + c.chipBg + ";" +
+      (on ? "border-color:" + c.color + ";box-shadow:inset 0 0 0 1.5px " + c.color + ", 0 2px 5px rgba(150,120,90,0.10);" : "");
+    return '<button class="chip" data-act="pickcat" data-cat="' + c.id + '" style="' + style + '" aria-pressed="' + on + '">' +
+      catIcon(c.id, 44) + '<span class="chip-text">' + esc(c.name) + '</span></button>';
+  }).join("");
+
+  var recent = entries.slice().sort(function (a, b) { return b.date.localeCompare(a.date); }).slice(0, 8);
+  var recentHTML = recent.length === 0
+    ? '<div class="empty"><div style="max-width:170px;margin:0 auto">' + bunnyPeek() + '</div><div style="margin-top:8px">まだ記録がないよ。<br>最初の1件を入れてみよう！</div></div>'
+    : '<div class="card">' + recent.map(entryRowHTML).join("") + '</div>';
+
+  return '<div class="card" style="padding-bottom:0;overflow:hidden">' +
+    '<div class="card-heading">' + miniIcon("bag", 22) + 'いくら使った？</div>' +
+    '<div class="amount-flex">' +
+    '<div class="amount-left">' +
+    '<div class="amount-row"><span class="amount-yen">¥</span>' +
+    '<input class="amount-input" id="inpAmount" type="number" inputmode="numeric" placeholder="0" value="' + esc(draft.amount) + '"></div>' +
+    '<div class="amount-underline"></div>' +
+    '</div>' +
+    '<div class="bunny-wrap">' + bunnyPeek() + '</div>' +
+    '</div></div>' +
+
+    '<div class="section-title" style="margin-top:20px">' + miniIcon("tag", 20) + 'なにに使った？</div>' +
+    '<div class="chip-grid">' + chips + '</div>' +
+
+    '<div style="display:flex;gap:12px;margin-top:6px">' +
+    '<div style="flex:1"><label class="field-label" for="inpDate">' + miniIcon("calendar", 18) + '日付</label>' +
+    '<input class="field" id="inpDate" type="date" value="' + esc(draft.date) + '"></div>' +
+    '<div style="flex:1.3"><label class="field-label" for="inpMemo">' + miniIcon("pencil", 18) + 'メモ（任意）</label>' +
+    '<input class="field" id="inpMemo" type="text" placeholder="例：友達とランチ" value="' + esc(draft.memo) + '"></div>' +
+    '</div>' +
+    '<button class="add-btn" data-act="add">' + bunnyFace(30) + '<span>記録する ✨</span></button>' +
+
+    '<div class="section-title">' + miniIcon("pencil", 18) + '最近の記録</div>' + recentHTML;
+}
+
+function renderMonth() {
+  var list = getMonthEntries();
+  var total = 0;
+  list.forEach(function (e) { total += e.amount; });
+  var byCat = catBreakdown(list);
+
+  var body;
+  if (byCat.length === 0) {
+    body = '<div class="muted-note" style="padding:6px 0">この月の記録はまだないよ</div>';
+  } else {
+    body = '<div style="text-align:left">' + catBarsHTML(byCat, false) +
+      '<div class="dashed"></div>' + donutSVG(byCat) + '</div>';
+  }
+
+  return '<div class="month-nav">' +
+    '<button class="nav-btn" data-act="shiftmonth" data-d="-1" aria-label="前の月">‹</button>' +
+    '<div class="month-label">' + viewYM.y + '年' + viewYM.m + '月</div>' +
+    '<button class="nav-btn" data-act="shiftmonth" data-d="1" aria-label="次の月">›</button>' +
+    '</div>' +
+    '<div class="card" style="text-align:center">' +
+    '<div class="summary-caption">今月つかった金額 <button class="hint" data-act="hint" aria-label="説明">?</button></div>' +
+    '<div style="max-width:190px;margin:2px auto 4px">' + bunnyPeek() + '</div>' +
+    '<div class="big-amount"><span class="big-amount-pre">合計 </span><span class="big-amount-num">' + yen(total) + '</span></div>' +
+    '<div class="dashed"></div>' + body +
+    '</div>' +
+    '<div class="section-title">' + miniIcon("pencil", 18) + '明細（' + list.length + '件）</div>' +
+    (list.length ? '<div class="card">' + list.map(entryRowHTML).join("") + '</div>' : "");
+}
+
+function renderYear() {
+  var data = getYearData();
+  var avg = data.yearTotal / 12;
+  return '<div class="month-nav">' +
+    '<button class="nav-btn" data-act="shiftyear" data-d="-1" aria-label="前の年">‹</button>' +
+    '<div class="month-label">' + viewYear + '年</div>' +
+    '<button class="nav-btn" data-act="shiftyear" data-d="1" aria-label="次の年">›</button>' +
+    '</div>' +
+    '<div class="card" style="text-align:center">' +
+    '<div class="summary-caption">この1年でつかった金額</div>' +
+    '<div class="big-amount"><span class="big-amount-pre">累計 </span><span class="big-amount-num">' + yen(data.yearTotal) + '</span></div>' +
+    '<div style="font-size:12px;color:var(--sub);margin-top:2px;font-weight:700">月平均 <span style="color:var(--pink-deep);font-weight:800">' + yen(avg) + '</span></div>' +
+    '</div>' +
+    '<div class="card"><div class="card-heading">' + miniIcon("calendar", 20) + '月ごとの支出</div>' + barChartSVG(data.arr) + '</div>' +
+    '<div class="card"><div class="card-heading">' + miniIcon("trophy", 20) + '費目ランキング</div>' +
+    (data.cats.length === 0 ? '<div class="muted-note">この年の記録はまだないよ</div>' : catBarsHTML(data.cats, true)) +
+    '</div>';
+}
+
+var mainEl = document.getElementById("main");
+var tabbarEl = document.getElementById("tabbar");
+document.getElementById("avatarSlot").innerHTML =
+  '<div style="margin-bottom:-10px">' + bunnyFace(38) + '</div>';
+
+function render() {
+  if (tab === "add") mainEl.innerHTML = renderAdd();
+  else if (tab === "month") mainEl.innerHTML = renderMonth();
+  else mainEl.innerHTML = renderYear();
+  renderTabbar();
+}
+function renderTabbar() {
+  var tabs = [
+    { id: "add", label: "記録する", icon: miniIcon("pencil", 26) },
+    { id: "month", label: "今月", icon: bunnyFace(26) },
+    { id: "year", label: "一年", icon: miniIcon("cloud", 26) }
+  ];
+  tabbarEl.innerHTML = tabs.map(function (t) {
+    return '<button class="tab-btn' + (tab === t.id ? " active" : "") + '" data-tab="' + t.id + '">' +
+      t.icon + '<span class="tab-label">' + t.label + '</span></button>';
+  }).join("");
+}
+
+// ---------- 操作 ----------
+function flash(msg) {
+  var old = document.querySelector(".toast");
+  if (old) old.remove();
+  var el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = msg;
+  document.body.appendChild(el);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { el.remove(); }, 1800);
+}
+
+function addEntry() {
+  var v = Number(draft.amount);
+  if (!v || v <= 0) { flash("金額を入力してね"); return; }
+  if (!draft.catId) { flash("費目を選んでね"); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date)) { flash("日付を入れてね"); return; }
+  var e = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    date: draft.date, amount: Math.round(v), catId: draft.catId, memo: draft.memo.trim()
+  };
+  entries.unshift(e);
+  saveEntries();
+  draft.amount = ""; draft.memo = ""; draft.catId = null;
+  render();
+  flash(yen(e.amount) + " を記録したよ！");
+}
+
+function removeEntry(id) {
+  entries = entries.filter(function (e) { return e.id !== id; });
+  saveEntries();
+  render();
+  flash("削除したよ");
+}
+
+mainEl.addEventListener("click", function (ev) {
+  var t = ev.target.closest("[data-act]");
+  if (!t) return;
+  var act = t.getAttribute("data-act");
+  if (act === "pickcat") { draft.catId = t.getAttribute("data-cat"); render(); }
+  else if (act === "add") addEntry();
+  else if (act === "del") removeEntry(t.getAttribute("data-id"));
+  else if (act === "shiftmonth") {
+    var d = Number(t.getAttribute("data-d"));
+    var m = viewYM.m + d, y = viewYM.y;
+    if (m === 0) { m = 12; y -= 1; }
+    if (m === 13) { m = 1; y += 1; }
+    viewYM = { y: y, m: m };
+    render();
+  }
+  else if (act === "shiftyear") { viewYear += Number(t.getAttribute("data-d")); render(); }
+  else if (act === "hint") flash("この月に記録した支出の合計だよ");
+  else if (act === "showval") flash(t.getAttribute("data-label") + "：" + yen(Number(t.getAttribute("data-value"))));
+});
+
+mainEl.addEventListener("input", function (ev) {
+  if (ev.target.id === "inpAmount") draft.amount = ev.target.value;
+  else if (ev.target.id === "inpDate") draft.date = ev.target.value;
+  else if (ev.target.id === "inpMemo") draft.memo = ev.target.value;
+});
+
+tabbarEl.addEventListener("click", function (ev) {
+  var t = ev.target.closest("[data-tab]");
+  if (!t) return;
+  tab = t.getAttribute("data-tab");
+  render();
+  window.scrollTo(0, 0);
+});
+
+// ---------- 設定シート ----------
+document.getElementById("gearBtn").addEventListener("click", openSheet);
+function openSheet() {
+  var bg = document.createElement("div");
+  bg.className = "sheet-bg";
+  bg.innerHTML = '<div class="sheet">' +
+    '<div class="sheet-title">' + bunnyFace(24) + '設定</div>' +
+    '<div class="sheet-sub">記録は ' + entries.length + ' 件。データはこの端末の中だけに保存されます。</div>' +
+    '<button class="sheet-btn" id="btnExport">📤 バックアップを保存（JSON）</button>' +
+    '<label class="sheet-btn" for="fileImport" style="cursor:pointer">📥 バックアップから復元（JSON）</label>' +
+    '<input type="file" id="fileImport" accept=".json,application/json" style="display:none">' +
+    '<button class="sheet-btn danger" id="btnWipe">🗑️ データを全部消す</button>' +
+    '<button class="sheet-close" id="btnCloseSheet">閉じる</button>' +
+    '</div>';
+  document.body.appendChild(bg);
+  bg.addEventListener("click", function (ev) { if (ev.target === bg) bg.remove(); });
+  bg.querySelector("#btnCloseSheet").addEventListener("click", function () { bg.remove(); });
+  bg.querySelector("#btnExport").addEventListener("click", function () {
+    var blob = new Blob([JSON.stringify({ entries: entries }, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "okozukai-backup-" + todayStr() + ".json";
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    flash("バックアップを保存したよ");
+  });
+  bg.querySelector("#fileImport").addEventListener("change", function (ev) {
+    var f = ev.target.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var d = JSON.parse(reader.result);
+        var list = Array.isArray(d) ? d : d.entries;
+        if (!Array.isArray(list)) throw new Error("format");
+        var ok = list.every(function (e) { return e && e.id && e.date && typeof e.amount === "number"; });
+        if (!ok) throw new Error("format");
+        if (!confirm("いまの記録（" + entries.length + "件）を、このバックアップ（" + list.length + "件）で置き換えます。よい？")) return;
+        entries = list;
+        saveEntries();
+        render();
+        bg.remove();
+        flash("復元したよ（" + list.length + "件）");
+      } catch (e) {
+        flash("読み込めなかった…ファイルを確認してね");
+      }
+    };
+    reader.readAsText(f);
+  });
+  bg.querySelector("#btnWipe").addEventListener("click", function () {
+    if (!confirm("本当に全部消す？この操作は取り消せないよ。")) return;
+    entries = [];
+    saveEntries();
+    render();
+    bg.remove();
+    flash("全部消したよ");
+  });
+}
+
+// ---------- 起動 ----------
+render();
+if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js").catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
