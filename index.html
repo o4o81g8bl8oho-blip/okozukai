@@ -441,23 +441,9 @@ function flower(x, y, petal) {
     '<circle cx="' + x + '" cy="' + y + '" r="2.2" fill="#F6D98B"/>';
 }
 
-// 草原からひょっこりうさぎ
+// 草原からひょっこりうさぎ（いくら使った？カードと同じイラスト）
 function bunnyPeek() {
-  return '<svg viewBox="0 0 190 122" aria-hidden="true">' +
-    sparkle(38, 30, 5, "#F3D98B") + sparkle(160, 22, 6.5, "#F3D98B") + sparkle(170, 78, 4, "#F3D98B") +
-    heart(146, 40, 5.5, "#F3A9B8") + heart(160, 58, 3.8, "#F7C9D4") +
-    '<g transform="rotate(-9 78 32)"><ellipse cx="78" cy="30" rx="8" ry="20" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2.2"/><ellipse cx="78" cy="33" rx="3.6" ry="12" fill="#F6CBC9"/></g>' +
-    '<g transform="rotate(9 112 32)"><ellipse cx="112" cy="30" rx="8" ry="20" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2.2"/><ellipse cx="112" cy="33" rx="3.6" ry="12" fill="#F6CBC9"/></g>' +
-    '<circle cx="95" cy="72" r="34" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2.2"/>' +
-    '<circle cx="83" cy="70" r="3.6" fill="#4C3B31"/><circle cx="107" cy="70" r="3.6" fill="#4C3B31"/>' +
-    '<circle cx="84.4" cy="68.6" r="1.2" fill="#FFF"/><circle cx="108.4" cy="68.6" r="1.2" fill="#FFF"/>' +
-    '<ellipse cx="71" cy="79" rx="5.5" ry="3.6" fill="#F6BFBC"/><ellipse cx="119" cy="79" rx="5.5" ry="3.6" fill="#F6BFBC"/>' +
-    '<path d="M91 76q2 2.8 4 .7 2 2.1 4-.7" fill="none" stroke="#4C3B31" stroke-width="1.8" stroke-linecap="round"/>' +
-    '<ellipse cx="95" cy="110" rx="88" ry="9" fill="#E4EFD4"/>' +
-    '<ellipse cx="82" cy="103" rx="7.5" ry="5.5" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2"/>' +
-    '<ellipse cx="108" cy="103" rx="7.5" ry="5.5" fill="#FBEDCB" stroke="' + ST + '" stroke-width="2"/>' +
-    flower(24, 100, "#F7C9D4") + flower(166, 98, "#F7C9D4") +
-    '</svg>';
+  return '<img src="ui/bunny-hero.jpg" alt="" style="width:100%;display:block;border-radius:14px">';
 }
 
 // ---------- 費目 ----------
@@ -660,7 +646,7 @@ function renderAdd() {
 
   var recent = entries.slice().sort(function (a, b) { return b.date.localeCompare(a.date); }).slice(0, 8);
   var recentHTML = recent.length === 0
-    ? '<div class="empty"><div style="max-width:170px;margin:0 auto">' + bunnyPeek() + '</div><div style="margin-top:8px">まだ記録がないよ。<br>最初の1件を入れてみよう！</div></div>'
+    ? '<div class="empty"><div style="max-width:230px;margin:0 auto">' + bunnyPeek() + '</div><div style="margin-top:8px">まだ記録がないよ。<br>最初の1件を入れてみよう！</div></div>'
     : '<div class="card">' + recent.map(entryRowHTML).join("") + '</div>';
 
   return '<div class="hero-card"><img src="ui/card.jpg" alt="いくら使った？">' +
@@ -707,7 +693,7 @@ function renderMonth() {
     '</div>' +
     '<div class="card" style="text-align:center">' +
     '<div class="summary-caption">今月つかった金額 <button class="hint" data-act="hint" aria-label="説明">?</button></div>' +
-    '<div style="max-width:190px;margin:2px auto 4px">' + bunnyPeek() + '</div>' +
+    '<div style="max-width:230px;margin:2px auto 4px">' + bunnyPeek() + '</div>' +
     '<div class="big-amount"><span class="big-amount-pre">合計 </span><span class="big-amount-num">' + yen(total) + '</span></div>' +
     '<div class="dashed"></div>' + body +
     '</div>' +
