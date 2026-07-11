@@ -1,5 +1,5 @@
 /* おこづかい帳 Service Worker */
-var CACHE = 'okozukai-v3';
+var CACHE = 'okozukai-v4';
 var FONT_CACHE = 'okozukai-fonts-v1';
 var ASSETS = [
   './',
@@ -7,7 +7,30 @@ var ASSETS = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png',
+  './ui/card.jpg',
+  './ui/avatar.jpg',
+  './ui/btn.jpg',
+  './ui/tile-eatout.jpg',
+  './ui/tile-conbini.jpg',
+  './ui/tile-hobby.jpg',
+  './ui/tile-book.jpg',
+  './ui/tile-fashion.jpg',
+  './ui/tile-clothes.jpg',
+  './ui/tile-gift.jpg',
+  './ui/tile-subsc.jpg',
+  './ui/tile-other.jpg',
+  './ui/tag.png',
+  './ui/star.png',
+  './ui/cal-label.png',
+  './ui/pen-label.png',
+  './ui/cal-field.png',
+  './ui/memo-bunny.png',
+  './ui/cloud-l.png',
+  './ui/cloud-r.png',
+  './ui/tab-pencil.png',
+  './ui/tab-bunny.png',
+  './ui/tab-cloud.png'
 ];
 
 self.addEventListener('install', function(e) {
