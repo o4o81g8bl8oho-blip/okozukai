@@ -92,21 +92,12 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--pink); ou
   position: relative; display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 10px 17px; margin: 0 22px;
 }
-.tile { position: relative; border: none; background: none; padding: 0; border-radius: 18px; cursor: pointer; aspect-ratio: 232 / 194; }
-.tile img { width: 100%; height: 100%; display: block; border-radius: 18px; object-fit: cover; }
-.tile-card {
-  /* 画像タイルに焼き込まれたカードと同じ位置（左上寄り） */
-  position: absolute; inset: 1% 3% 3.5% 1%;
-  background: #F4F5E7;
-  border-radius: 9px; border: 2px solid rgba(255,255,255,0.85);
-  box-shadow: 0 3px 6px rgba(150,120,90,0.14);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-}
-.tile-card svg { width: 46%; height: auto; display: block; }
-.tile-name { font-size: 12px; font-weight: 700; color: #7A6C62; letter-spacing: 0.05em; }
+.tile { position: relative; border: none; background: none; padding: 0; border-radius: 12px; cursor: pointer; aspect-ratio: 232 / 230; }
+.tile img { width: 100%; height: 100%; display: block; border-radius: 12px; object-fit: cover; }
 .tile[aria-pressed="true"]::after {
-  content: ""; position: absolute; inset: 0.3% 2.3% 2.8% 0.3%;
-  border: 3px solid var(--pink-deep); border-radius: 10px; pointer-events: none;
+  /* タイル画像内のカード（余白: 上下左右2.2%、下3.9%）に沿う選択枠 */
+  content: ""; position: absolute; inset: 1.6% 1.6% 3.3% 1.6%;
+  border: 3px solid var(--pink-deep); border-radius: 13px; pointer-events: none;
 }
 .grid-star { position: absolute; right: -19px; top: 44%; width: 28px; pointer-events: none; }
 .dm-row { display: flex; gap: 15px; margin: 18px 22px 0; }
@@ -662,13 +653,8 @@ function catBarsHTML(cats, withRank) {
 function renderAdd() {
   var tiles = CATEGORIES.map(function (c) {
     var on = draft.catId === c.id;
-    var inner = c.id === "transport"
-      ? '<span class="tile-card">' +
-        '<svg viewBox="0 0 48 48" aria-hidden="true">' + ICONS.transport + '</svg>' +
-        '<span class="tile-name">' + esc(c.name) + '</span></span>'
-      : '<img src="ui/tile-' + c.id + '.jpg" alt="' + esc(c.name) + '">';
     return '<button class="tile" data-act="pickcat" data-cat="' + c.id + '" aria-pressed="' + on + '">' +
-      inner + '</button>';
+      '<img src="ui/tile-' + c.id + '.jpg" alt="' + esc(c.name) + '"></button>';
   }).join("");
 
   var recent = entries.slice().sort(function (a, b) { return b.date.localeCompare(a.date); }).slice(0, 8);
