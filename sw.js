@@ -1,5 +1,5 @@
 /* おこづかい帳 Service Worker */
-var CACHE = 'okozukai-v10';
+var CACHE = 'okozukai-v11';
 var FONT_CACHE = 'okozukai-fonts-v1';
 var ASSETS = [
   './',
@@ -9,7 +9,8 @@ var ASSETS = [
   './icon-512.png',
   './apple-touch-icon.png',
   './ui/card.jpg',
-  './ui/bunny-hero.jpg',
+  './ui/bunny-peek.jpg',
+  './ui/bunny-purse.jpg',
   './ui/avatar.jpg',
   './ui/btn.jpg',
   './ui/tile-eatout.jpg',

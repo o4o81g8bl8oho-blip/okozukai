@@ -441,9 +441,13 @@ function flower(x, y, petal) {
     '<circle cx="' + x + '" cy="' + y + '" r="2.2" fill="#F6D98B"/>';
 }
 
-// 草原からひょっこりうさぎ（いくら使った？カードと同じイラスト）
+// 草原からひょっこりうさぎ（いくら使った？と同じキャラの反転構図）
 function bunnyPeek() {
-  return '<img src="ui/bunny-hero.jpg" alt="" style="width:100%;display:block;border-radius:14px">';
+  return '<img src="ui/bunny-peek.jpg" alt="" style="width:100%;display:block;border-radius:14px">';
+}
+// がま口財布を持ったうさぎ（今月画面用）
+function bunnyPurse() {
+  return '<img src="ui/bunny-purse.jpg" alt="" style="width:100%;display:block;border-radius:14px">';
 }
 
 // ---------- 費目 ----------
@@ -693,7 +697,7 @@ function renderMonth() {
     '</div>' +
     '<div class="card" style="text-align:center">' +
     '<div class="summary-caption">今月つかった金額 <button class="hint" data-act="hint" aria-label="説明">?</button></div>' +
-    '<div style="max-width:230px;margin:2px auto 4px">' + bunnyPeek() + '</div>' +
+    '<div style="max-width:175px;margin:2px auto 4px">' + bunnyPurse() + '</div>' +
     '<div class="big-amount"><span class="big-amount-pre">合計 </span><span class="big-amount-num">' + yen(total) + '</span></div>' +
     '<div class="dashed"></div>' + body +
     '</div>' +
