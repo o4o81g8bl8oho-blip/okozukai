@@ -1,5 +1,5 @@
 /* おこづかい帳 Service Worker */
-var CACHE = 'okozukai-v11';
+var CACHE = 'okozukai-v12';
 var FONT_CACHE = 'okozukai-fonts-v1';
 var ASSETS = [
   './',
